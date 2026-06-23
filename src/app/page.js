@@ -181,7 +181,7 @@ function HeroSection() {
               >
                 <div style={{ position: 'relative', width: '100%', height: '100%' }} suppressHydrationWarning>
                   <video
-                    src="/Video Project 4.mp4"
+                    src="/hero-video.mp4"
                     autoPlay
                     loop
                     muted
