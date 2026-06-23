@@ -1,7 +1,7 @@
 <div align="center">
   <img src="public/logo-hero.png" alt="Logo Memória do São João de Amargosa" width="300"/>
 
-  # Projeto Memorias Juninas
+  # Projeto Memórias Juninas
   
   **O arquivo vivo de quem viveu a maior festa junina do interior da Bahia.**
 
@@ -15,7 +15,7 @@
 
 ## 🌽 Sobre o Projeto
 
-O **Projeto Memorias Juninas** é um arquivo cultural digital colaborativo dedicado a preservar fotos, vídeos, histórias e depoimentos de todas as edições do São João de Amargosa, uma das festas juninas mais tradicionais do Brasil. 
+O **Projeto Memórias Juninas** é um arquivo cultural digital colaborativo dedicado a preservar fotos, vídeos, histórias e depoimentos de todas as edições do São João de Amargosa, uma das festas juninas mais tradicionais do Brasil. 
 
 Qualquer pessoa pode enviar uma memória da festa. Após a revisão da moderação, o conteúdo entra para o acervo público do site, ficando preservado e acessível para toda a comunidade.
 
