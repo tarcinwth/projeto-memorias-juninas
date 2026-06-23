@@ -1,57 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApps, initializeApp, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-import { getAuth } from 'firebase-admin/auth';
+export const dynamic = 'force-dynamic';
 
-function initFirebaseAdmin() {
+async function getFirebaseAdmin() {
+  const { getApps, initializeApp, cert } = await import('firebase-admin/app');
+  const { getFirestore } = await import('firebase-admin/firestore');
+  const { getAuth } = await import('firebase-admin/auth');
+
   if (!getApps().length) {
-    try {
-      let rawKey = process.env.FIREBASE_PRIVATE_KEY || '';
-      let privateKey = rawKey;
-      
-      // Handle Vercel wrapping the key in quotes
-      if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
-        try { privateKey = JSON.parse(privateKey); } catch (e) {}
-      }
-      
-      // Fix escaped newlines
-      privateKey = privateKey.replace(/\\n/g, '\n');
-
-      const serviceAccount = {
-        projectId: process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'demo-project',
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL || 'demo@example.com',
-        privateKey: privateKey || '-----BEGIN PRIVATE KEY-----\nDEMO\n-----END PRIVATE KEY-----\n',
-      };
-
-      if (!serviceAccount.privateKey || !serviceAccount.clientEmail) {
-        console.error('CRITICAL: Missing FIREBASE_PRIVATE_KEY or FIREBASE_CLIENT_EMAIL');
-      }
-
-      initializeApp({
-        credential: cert(serviceAccount),
-      });
-    } catch (e: any) {
-      console.error('Firebase admin init error:', e);
-      throw new Error(`Firebase Admin Init Error: ${e.message}`);
+    let rawKey = process.env.FIREBASE_PRIVATE_KEY || '';
+    let privateKey = rawKey;
+    
+    if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+      try { privateKey = JSON.parse(privateKey); } catch (e) {}
     }
+    privateKey = privateKey.replace(/\\n/g, '\n');
+
+    const serviceAccount = {
+      projectId: process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'demo-project',
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL || 'demo@example.com',
+      privateKey: privateKey || '-----BEGIN PRIVATE KEY-----\nDEMO\n-----END PRIVATE KEY-----\n',
+    };
+
+    initializeApp({
+      credential: cert(serviceAccount),
+    });
   }
-}
 
-function getAdminDb() {
-  initFirebaseAdmin();
-  return getFirestore();
-}
-
-function getAdminAuth() {
-  initFirebaseAdmin();
-  return getAuth();
+  return {
+    db: getFirestore(),
+    auth: getAuth()
+  };
 }
 
 export async function GET(request: NextRequest) {
   try {
-    initFirebaseAdmin();
-    const auth = getAdminAuth();
-    const db = getAdminDb();
+    const { db, auth } = await getFirebaseAdmin();
 
     const authHeader = request.headers.get('authorization');
     if (!authHeader?.startsWith('Bearer ')) {
@@ -91,8 +74,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const auth = getAdminAuth();
-    const db = getAdminDb();
+    const { db, auth } = await getFirebaseAdmin();
 
     const authHeader = request.headers.get('authorization');
     if (!authHeader?.startsWith('Bearer ')) {
