@@ -27,9 +27,7 @@ function GalleryFilters({ filters, onFilterChange, onReset, resultCount }) {
   return (
     <div
       style={{
-        position: 'sticky',
-        top: 'calc(1.5rem + 56px)',
-        zIndex: 100,
+        position: 'relative',
         background: 'rgba(253,250,244,0.92)',
         backdropFilter: 'blur(12px)',
         borderBottom: '1px solid var(--color-border)',
