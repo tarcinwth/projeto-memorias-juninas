@@ -1,0 +1,41 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Função auxiliar
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isImageOrVideo() {
+      return request.resource.contentType.matches('image/.*')
+          || request.resource.contentType.matches('video/.*')
+          || request.resource.contentType.matches('audio/.*');
+    }
+
+    function isUnderSizeLimit() {
+      // 50MB máximo
+      return request.resource.size <= 50 * 1024 * 1024;
+    }
+
+    // Memórias: organizadas por UID do autor
+    match /memorias/{userId}/{fileName} {
+      allow read: if true;
+      allow create: if isAuthenticated()
+                    && request.auth.uid == userId
+                    && isImageOrVideo()
+                    && isUnderSizeLimit();
+      allow delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Avatares de usuário
+    match /avatares/{userId}/{fileName} {
+      allow read: if true;
+      allow create: if isAuthenticated()
+                    && request.auth.uid == userId
+                    && request.resource.contentType.matches('image/.*')
+                    && request.resource.size <= 5 * 1024 * 1024;
+      allow delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+  }
+}

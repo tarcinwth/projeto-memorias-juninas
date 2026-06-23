@@ -1,0 +1,124 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Funções auxiliares ──────────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isValidMemoria() {
+      let data = request.resource.data;
+      return data.titulo is string && data.titulo.size() >= 3 && data.titulo.size() <= 120
+          && data.descricao is string && data.descricao.size() >= 10 && data.descricao.size() <= 2000
+          && data.tipo in ['foto', 'video', 'historia', 'audio', 'depoimento']
+          && data.anoDoSaoJoao is int && data.anoDoSaoJoao >= 1960 && data.anoDoSaoJoao <= 2026
+          && data.autorNome is string && data.autorNome.size() >= 2
+          && data.autorCidade is string && data.autorCidade.size() >= 2
+          && data.categoria in ['quadrilha', 'shows', 'vila', 'comida', 'familia', 'forro']
+          && data.status == 'pendente';
+    }
+
+    // ── Coleção: memorias ───────────────────────────────────────────
+    match /memorias/{memoriaId} {
+
+      // Qualquer pessoa pode ler memórias aprovadas
+      allow read: if resource.data.status == 'aprovado'
+                  || (isAuthenticated() && resource.data.autorId == request.auth.uid)
+                  || isAdmin();
+
+      // Criar: usuário autenticado, dados válidos, autorId = UID do usuário
+      allow create: if isAuthenticated()
+                    && isValidMemoria()
+                    && request.resource.data.autorId == request.auth.uid
+                    && request.resource.data.likeCount == 0
+                    && request.resource.data.comentarioCount == 0
+                    && request.resource.data.viewCount == 0;
+
+      // Allow updating counters (likeCount, viewCount, comentarioCount) if authenticated
+      function isOnlyUpdatingCounters() {
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'viewCount', 'comentarioCount']);
+      }
+
+      // Update: apenas campos não-críticos pelo próprio autor, ou admin para moderação, ou qualquer um para contadores
+      allow update: if isAdmin()
+                    || (isAuthenticated() && isOnlyUpdatingCounters())
+                    || (isOwner(resource.data.autorId)
+                        && resource.data.status == 'pendente'
+                        && request.resource.data.status == 'pendente'
+                        && request.resource.data.autorId == resource.data.autorId);
+
+      // Deletar: apenas admin ou próprio autor se ainda pendente
+      allow delete: if isAdmin()
+                    || (isOwner(resource.data.autorId) && resource.data.status == 'pendente');
+
+      // ── Subcoleção: likes ─────────────────────────────────────────
+      match /likes/{userId} {
+        allow read: if true;
+        allow create: if isAuthenticated() && request.auth.uid == userId;
+        allow delete: if isAuthenticated() && request.auth.uid == userId;
+      }
+
+      // ── Subcoleção: comentarios ───────────────────────────────────
+      match /comentarios/{comentarioId} {
+        allow read: if true;
+        allow create: if isAuthenticated()
+                      && request.resource.data.autorId == request.auth.uid
+                      && request.resource.data.texto.size() >= 1
+                      && request.resource.data.texto.size() <= 500
+                      && request.resource.data.status == 'ativo';
+        allow update: if isAdmin()
+                      || (isOwner(resource.data.autorId)
+                          && request.resource.data.status == 'removido'
+                          && request.resource.data.autorId == resource.data.autorId
+                          && request.resource.data.texto == resource.data.texto);
+        allow delete: if isAdmin();
+      }
+    }
+
+    // ── Coleção: usuarios ────────────────────────────────────────────
+    match /usuarios/{userId} {
+      function isOnlyUpdatingTotalLikes() {
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['totalLikesRecebidos']);
+      }
+
+      allow read: if resource.data.perfilPublico == true || isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId)
+                    && request.resource.data.uid == userId
+                    && request.resource.data.totalMemorias == 0
+                    && request.resource.data.totalLikesRecebidos == 0;
+      allow update: if isOwner(userId)
+                    && request.resource.data.uid == resource.data.uid
+                    || (isAuthenticated() && isOnlyUpdatingTotalLikes());
+      allow delete: if isAdmin();
+    }
+
+    // ── Coleção: anos (somente leitura pública, escrita via Cloud Function) ──
+    match /anos/{ano} {
+      allow read: if true;
+      allow write: if false;  // apenas Cloud Functions escrevem aqui
+    }
+
+    // ── Coleção: moderacao ───────────────────────────
+    match /moderacao/{docId} {
+      // Qualquer usuário pode submeter uma memória para moderação
+      allow create: if isAuthenticated() && request.resource.data.autorId == request.auth.uid;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ── Coleção: admins (apenas leitura pelo próprio, escrita bloqueada) ──
+    match /admins/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+  }
+}
