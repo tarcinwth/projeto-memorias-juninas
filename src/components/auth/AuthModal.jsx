@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { auth } from '@/lib/firebase/config';
+import { entrarComGoogle } from '@/lib/firebase/auth';
 import { X, GoogleLogo, Spinner } from '@phosphor-icons/react';
 
 export default function AuthModal({ isOpen, onClose }) {
@@ -12,18 +11,12 @@ export default function AuthModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   async function handleGoogleLogin() {
-    setLoading(true);
-    setError('');
-    const provider = new GoogleAuthProvider();
-    
     try {
-      await signInWithPopup(auth, provider);
+      await entrarComGoogle();
       onClose(); // Close modal on success
     } catch (err) {
       console.error(err);
       setError('Erro ao fazer login com o Google. Tente novamente.');
-    } finally {
-      setLoading(false);
     }
   }
 
