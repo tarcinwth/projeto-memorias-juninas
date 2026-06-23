@@ -28,7 +28,6 @@ Qualquer pessoa pode enviar uma memória da festa. Após a revisão da moderaç�
 * ❤️ **Curtidas (Likes) em Tempo Real:** Sistema de interações persistentes no Firebase (requer login).
 * 📤 **Upload de Mídia:** Envio seguro e otimizado de imagens e vídeos de até 50MB, integrando com Cloudinary.
 * 📲 **Web Share API:** Compartilhamento nativo de memórias no WhatsApp e Redes Sociais através de dispositivos móveis.
-* 🛡️ **Painel de Moderação Seguro:** Rota administrativa blindada, acessível apenas pelo administrador autorizado do projeto.
 
 ---
 
