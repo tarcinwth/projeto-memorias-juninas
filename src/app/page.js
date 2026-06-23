@@ -176,22 +176,24 @@ function HeroSection() {
                   overflow: 'hidden',
                   background: 'var(--color-surface-warm)',
                   position: 'relative',
-                  display: 'flex',
+                  aspectRatio: '4/5',
                 }}
               >
-                <video
-                  src="/Video Project 4.mp4"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  style={{
-                    width: '100%',
-                    height: 'auto',
-                    objectFit: 'contain',
-                    display: 'block',
-                  }}
-                />
+                <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                  <video
+                    src="/Video Project 4.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      transform: 'scale(1.35)',
+                    }}
+                  />
+                </div>
                 {/* Year overlay badge */}
                 <div
                   style={{
