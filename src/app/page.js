@@ -179,7 +179,7 @@ function HeroSection() {
                   aspectRatio: '4/5',
                 }}
               >
-                <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                <div style={{ position: 'relative', width: '100%', height: '100%' }} suppressHydrationWarning>
                   <video
                     src="/Video Project 4.mp4"
                     autoPlay
