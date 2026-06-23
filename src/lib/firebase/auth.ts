@@ -12,9 +12,20 @@ import { auth } from './config';
 
 const googleProvider = new GoogleAuthProvider();
 
-export async function loginComGoogle(): Promise<UserCredential> {
-  return signInWithPopup(auth, googleProvider);
+export async function entrarComGoogle(): Promise<UserCredential | void> {
+  // Se for celular (que costuma bloquear popup em navegadores in-app como Instagram/WhatsApp), usar signInWithRedirect
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  
+  if (isMobile) {
+    const { signInWithRedirect } = await import('firebase/auth');
+    return signInWithRedirect(auth, googleProvider);
+  } else {
+    return signInWithPopup(auth, googleProvider);
+  }
 }
+
+// Mantendo o alias antigo caso seja usado em outro lugar
+export const loginComGoogle = entrarComGoogle;
 
 export async function loginComEmail(email: string, senha: string): Promise<UserCredential> {
   return signInWithEmailAndPassword(auth, email, senha);
