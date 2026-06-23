@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(fila);
   } catch (error: any) {
     console.error('Erro na API de moderação:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }
 
