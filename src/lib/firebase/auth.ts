@@ -1,6 +1,7 @@
 import {
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
@@ -12,16 +13,11 @@ import { auth } from './config';
 
 const googleProvider = new GoogleAuthProvider();
 
-export async function entrarComGoogle(): Promise<UserCredential | void> {
-  // Se for celular (que costuma bloquear popup em navegadores in-app como Instagram/WhatsApp), usar signInWithRedirect
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  
-  if (isMobile) {
-    const { signInWithRedirect } = await import('firebase/auth');
-    return signInWithRedirect(auth, googleProvider);
-  } else {
-    return signInWithPopup(auth, googleProvider);
-  }
+export function entrarComGoogle(): Promise<UserCredential | void> | void {
+  // O uso de signInWithPopup está sendo bloqueado pelo Firefox (Fingerprinting Protection)
+  // e bloqueadores de anúncios devido ao contexto de cookies de terceiros.
+  // signInWithRedirect é a opção mais segura para funcionar em todos os navegadores e celulares.
+  return signInWithRedirect(auth, googleProvider);
 }
 
 // Mantendo o alias antigo caso seja usado em outro lugar

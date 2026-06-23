@@ -11,9 +11,7 @@ export default function AuthModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   async function handleLogin() {
-    setError(null);
     try {
-      // Chama o login imediatamente para o navegador não bloquear o popup
       await entrarComGoogle();
       onClose();
     } catch (err) {
