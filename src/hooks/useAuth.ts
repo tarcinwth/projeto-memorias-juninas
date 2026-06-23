@@ -21,6 +21,15 @@ export function useAuth(): UseAuthReturn {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Tenta processar o resultado do signInWithRedirect caso a página tenha recarregado
+    import('firebase/auth').then(({ getRedirectResult }) => {
+      getRedirectResult(auth).catch((err) => {
+        console.error('Erro no redirecionamento do Firebase:', err);
+      });
+    });
+  }, []);
+
+  useEffect(() => {
     let unsubscribe: (() => void) | undefined;
 
     const fetchOrCreateProfile = async () => {
