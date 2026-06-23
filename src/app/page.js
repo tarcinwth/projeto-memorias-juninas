@@ -180,13 +180,17 @@ function HeroSection() {
                 }}
               >
                 <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                  <Image
-                    src="/logo-hero.png"
-                    alt="Logo São João de Amargosa"
-                    fill
-                    priority
-                    style={{ objectFit: 'contain', padding: '2rem' }}
-                    sizes="(max-width: 1024px) 100vw, 50vw"
+                  <video
+                    src="/Video Project 4.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                    }}
                   />
                 </div>
                 {/* Year overlay badge */}
