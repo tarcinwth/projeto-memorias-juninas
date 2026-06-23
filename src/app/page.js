@@ -214,7 +214,7 @@ function HeroSection() {
                       letterSpacing: '-0.02em',
                     }}
                   >
-                    Desde 1963
+                    Desde 1891
                   </div>
                   <div
                     style={{
