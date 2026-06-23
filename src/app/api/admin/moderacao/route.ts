@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import * as admin from 'firebase-admin';
+
 export const dynamic = 'force-dynamic';
 
 async function getFirebaseAdmin() {
-  const { getApps, initializeApp, cert } = await import('firebase-admin/app');
-  const { getFirestore } = await import('firebase-admin/firestore');
-  const { getAuth } = await import('firebase-admin/auth');
-
-  if (!getApps().length) {
+  if (!admin.apps.length) {
     let rawKey = process.env.FIREBASE_PRIVATE_KEY || '';
     let privateKey = rawKey;
     
@@ -21,14 +19,14 @@ async function getFirebaseAdmin() {
       privateKey: privateKey || '-----BEGIN PRIVATE KEY-----\nDEMO\n-----END PRIVATE KEY-----\n',
     };
 
-    initializeApp({
-      credential: cert(serviceAccount),
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
     });
   }
 
   return {
-    db: getFirestore(),
-    auth: getAuth()
+    db: admin.firestore(),
+    auth: admin.auth()
   };
 }
 
