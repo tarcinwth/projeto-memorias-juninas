@@ -5,17 +5,28 @@ import { getAuth } from 'firebase-admin/auth';
 
 function initFirebaseAdmin() {
   if (!getApps().length) {
-    // If during build time env vars are missing, provide mock ones to prevent build crashes
-    let rawKey = process.env.FIREBASE_PRIVATE_KEY || '';
-    let privateKey = rawKey.replace(/^['"]|['"]$/g, '').replace(/\\n/g, '\n');
-
-    const serviceAccount = {
-      projectId: process.env.FIREBASE_PROJECT_ID || 'demo-project',
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL || 'demo@example.com',
-      privateKey: privateKey || '-----BEGIN PRIVATE KEY-----\nDEMO\n-----END PRIVATE KEY-----\n',
-    };
-
     try {
+      let rawKey = process.env.FIREBASE_PRIVATE_KEY || '';
+      let privateKey = rawKey;
+      
+      // Handle Vercel wrapping the key in quotes
+      if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+        try { privateKey = JSON.parse(privateKey); } catch (e) {}
+      }
+      
+      // Fix escaped newlines
+      privateKey = privateKey.replace(/\\n/g, '\n');
+
+      const serviceAccount = {
+        projectId: process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'demo-project',
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL || 'demo@example.com',
+        privateKey: privateKey || '-----BEGIN PRIVATE KEY-----\nDEMO\n-----END PRIVATE KEY-----\n',
+      };
+
+      if (!serviceAccount.privateKey || !serviceAccount.clientEmail) {
+        console.error('CRITICAL: Missing FIREBASE_PRIVATE_KEY or FIREBASE_CLIENT_EMAIL');
+      }
+
       initializeApp({
         credential: cert(serviceAccount),
       });
