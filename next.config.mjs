@@ -20,6 +20,14 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/__/auth/:path*',
+        destination: `https://projeto-memorias-juninas.firebaseapp.com/__/auth/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
